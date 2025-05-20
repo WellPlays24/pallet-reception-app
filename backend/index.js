@@ -38,6 +38,7 @@ app.get('/pallets/:id', async (req, res) => {
   }
 });
 
+// Crear pallet
 app.post('/pallets', async (req, res) => {
   try {
     const { id, fecha, tipo, estado, origen, desde_empresa, hacia_empresa } = req.body;
@@ -83,25 +84,39 @@ app.post('/pallets', async (req, res) => {
   }
 });
 
-// Actualizar estado (solo estado)
+// Actualizar pallet
 app.patch('/pallets/:id/estado', async (req, res) => {
   try {
     const { id } = req.params;
     const { estado } = req.body;
-    if (!estado || !['POR_RECIBIR', 'RECIBIDO'].includes(estado)) {
-      return res.status(400).json({ error: 'Estado inválido' });
+
+    // Validar que estado esté presente
+    if (!estado) {
+      return res.status(400).json({ error: 'El campo estado es obligatorio' });
     }
+
+    // Validar valores permitidos
+    const estadosValidos = ['POR_RECIBIR', 'RECIBIDO'];
+    if (!estadosValidos.includes(estado)) {
+      return res.status(400).json({ error: `Estado inválido. Debe ser uno de: ${estadosValidos.join(', ')}` });
+    }
+
     const result = await pool.query(
       `UPDATE pallets SET estado = $1 WHERE id = $2 RETURNING *`,
       [estado, id]
     );
-    if (result.rows.length === 0) return res.status(404).json({ error: 'Pallet no encontrado' });
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Pallet no encontrado' });
+    }
+
     res.json(result.rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Error al actualizar estado' });
   }
 });
+
 
 // Eliminar pallet
 app.delete('/pallets/:id', async (req, res) => {
