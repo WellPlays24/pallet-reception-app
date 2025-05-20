@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const pool = require('./db');
 const http = require('http');
+const errorHandler = require('./middleware/errorHandler');  // Middleware de manejo de errores
 
 const app = express();
 app.use(cors());
@@ -17,8 +18,7 @@ app.get('/', (req, res) => {
 // Crear el servidor HTTP
 const server = http.createServer(app);
 
-
-// Obtener todos los pallets
+// Rutas para obtener pallets
 app.get('/pallets', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM pallets ORDER BY fecha DESC');
@@ -78,8 +78,7 @@ app.post('/pallets', async (req, res) => {
     res.status(201).json(result.rows[0]);
 
   } catch (err) {
-    console.error('Error al crear el pallet:', err); // Mejor mensaje de error
-
+    console.error('Error al crear el pallet:', err);
     if (err.code === '23505') { // error de clave primaria duplicada
       return res.status(409).json({ error: 'El ID del pallet ya existe' });
     }
@@ -87,8 +86,7 @@ app.post('/pallets', async (req, res) => {
   }
 });
 
-
-// Actualizar pallet
+// Actualizar estado del pallet
 app.patch('/pallets/:id/estado', async (req, res) => {
   try {
     const { id } = req.params;
@@ -121,7 +119,6 @@ app.patch('/pallets/:id/estado', async (req, res) => {
   }
 });
 
-
 // Eliminar pallet
 app.delete('/pallets/:id', async (req, res) => {
   try {
@@ -144,3 +141,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 // Exportar app y server para pruebas
 module.exports = { app, server };
+
+// Middleware de manejo de errores global
+//const errorHandler = require('./middleware/errorHandler');
+app.use(errorHandler);
