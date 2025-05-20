@@ -38,22 +38,47 @@ app.get('/pallets/:id', async (req, res) => {
   }
 });
 
-// Crear pallet
 app.post('/pallets', async (req, res) => {
   try {
     const { id, fecha, tipo, estado, origen, desde_empresa, hacia_empresa } = req.body;
+
+    // Validar campos requeridos y no vacíos
     if (!id || !fecha || !tipo || !estado || !origen || !desde_empresa || !hacia_empresa) {
-      return res.status(400).json({ error: 'Faltan campos requeridos' });
+      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
     }
+
+    // Validar tipo fijo
+    if (tipo !== 'INGRESO') {
+      return res.status(400).json({ error: 'Tipo debe ser "INGRESO"' });
+    }
+
+    // Validar estado válido
+    const estadosValidos = ['POR_RECIBIR', 'RECIBIDO'];
+    if (!estadosValidos.includes(estado)) {
+      return res.status(400).json({ error: `Estado inválido. Debe ser uno de: ${estadosValidos.join(', ')}` });
+    }
+
+    // Validar fecha válida
+    if (isNaN(Date.parse(fecha))) {
+      return res.status(400).json({ error: 'Fecha inválida' });
+    }
+
+    // Aquí podrías validar formato ID si quieres
+
     // Insertar pallet
     const result = await pool.query(
       `INSERT INTO pallets (id, fecha, tipo, estado, origen, desde_empresa, hacia_empresa)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [id, fecha, tipo, estado, origen, desde_empresa, hacia_empresa]
     );
+
     res.status(201).json(result.rows[0]);
+
   } catch (err) {
     console.error(err);
+    if (err.code === '23505') { // error de clave primaria duplicada
+      return res.status(409).json({ error: 'El ID del pallet ya existe' });
+    }
     res.status(500).json({ error: 'Error al crear pallet' });
   }
 });
@@ -94,3 +119,4 @@ app.delete('/pallets/:id', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en puerto ${PORT}`);
 });
+
