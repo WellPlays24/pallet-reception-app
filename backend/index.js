@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const pool = require('./db');
+const http = require('http');
 
 const app = express();
 app.use(cors());
@@ -9,10 +10,13 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-// Ruta base para probar
 app.get('/', (req, res) => {
   res.send('API Pallets funcionando');
 });
+
+// Crear el servidor HTTP
+const server = http.createServer(app);
+
 
 // Obtener todos los pallets
 app.get('/pallets', async (req, res) => {
@@ -43,7 +47,7 @@ app.post('/pallets', async (req, res) => {
   try {
     const { id, fecha, tipo, estado, origen, desde_empresa, hacia_empresa } = req.body;
 
-    // Validar campos requeridos y no vacíos
+    // Validar campos requeridos
     if (!id || !fecha || !tipo || !estado || !origen || !desde_empresa || !hacia_empresa) {
       return res.status(400).json({ error: 'Todos los campos son obligatorios' });
     }
@@ -64,8 +68,6 @@ app.post('/pallets', async (req, res) => {
       return res.status(400).json({ error: 'Fecha inválida' });
     }
 
-    // Aquí podrías validar formato ID si quieres
-
     // Insertar pallet
     const result = await pool.query(
       `INSERT INTO pallets (id, fecha, tipo, estado, origen, desde_empresa, hacia_empresa)
@@ -76,13 +78,15 @@ app.post('/pallets', async (req, res) => {
     res.status(201).json(result.rows[0]);
 
   } catch (err) {
-    console.error(err);
+    console.error('Error al crear el pallet:', err); // Mejor mensaje de error
+
     if (err.code === '23505') { // error de clave primaria duplicada
       return res.status(409).json({ error: 'El ID del pallet ya existe' });
     }
-    res.status(500).json({ error: 'Error al crear pallet' });
+    res.status(500).json({ error: 'Error al crear pallet', details: err.message || err });
   }
 });
+
 
 // Actualizar pallet
 app.patch('/pallets/:id/estado', async (req, res) => {
@@ -131,7 +135,12 @@ app.delete('/pallets/:id', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en puerto ${PORT}`);
-});
+// Servidor que podemos cerrar en las pruebas
+if (process.env.NODE_ENV !== 'test') {
+  server.listen(PORT, () => {
+    console.log(`Servidor escuchando en puerto ${PORT}`);
+  });
+}
 
+// Exportar app y server para pruebas
+module.exports = { app, server };
