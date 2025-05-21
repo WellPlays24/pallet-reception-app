@@ -13,11 +13,31 @@ class _AddPalletScreenState extends State<AddPalletScreen> {
   // Controladores para los campos del formulario
   final TextEditingController idController = TextEditingController();
   final TextEditingController fechaController = TextEditingController();
-  final TextEditingController tipoController = TextEditingController();
   final TextEditingController estadoController = TextEditingController();
   final TextEditingController origenController = TextEditingController();
   final TextEditingController desdeEmpresaController = TextEditingController();
   final TextEditingController haciaEmpresaController = TextEditingController();
+
+  // Variables para la selección
+  String tipo = "INGRESO"; // Tipo siempre será INGRESO
+  String estado = "POR_RECIBIR"; // Valor predeterminado de estado
+  DateTime? selectedDate = DateTime.now();
+
+  // Función para seleccionar la fecha usando el DatePicker
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate!,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null && picked != selectedDate)
+      setState(() {
+        selectedDate = picked;
+        fechaController.text = "${selectedDate!.toLocal()}".split(' ')[0];  // Formato yyyy-mm-dd
+      });
+  }
 
   // Función para enviar los datos al backend
   Future<void> _addPallet() async {
@@ -27,8 +47,8 @@ class _AddPalletScreenState extends State<AddPalletScreen> {
         final palletData = {
           'id': idController.text,
           'fecha': fechaController.text,
-          'tipo': tipoController.text,
-          'estado': estadoController.text,
+          'tipo': tipo,
+          'estado': estado,
           'origen': origenController.text,
           'desde_empresa': desdeEmpresaController.text,
           'hacia_empresa': haciaEmpresaController.text,
@@ -37,9 +57,10 @@ class _AddPalletScreenState extends State<AddPalletScreen> {
         // Llamar al servicio de API para agregar el pallet
         final response = await apiService.addPallet(palletData);
 
-        // Mostrar mensaje de éxito
+        // Mostrar mensaje de éxito y regresar a la lista de pallets
         if (response != null) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Pallet agregado con éxito')));
+          Navigator.pop(context); // Regresar a la pantalla anterior (lista de pallets)
         }
       } catch (e) {
         // Manejo de errores
@@ -75,6 +96,8 @@ class _AddPalletScreenState extends State<AddPalletScreen> {
               TextFormField(
                 controller: fechaController,
                 decoration: InputDecoration(labelText: 'Fecha'),
+                readOnly: true,
+                onTap: () => _selectDate(context),  // Abrir el selector de fecha
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese la fecha';
@@ -82,26 +105,29 @@ class _AddPalletScreenState extends State<AddPalletScreen> {
                   return null;
                 },
               ),
-              TextFormField(
-                controller: tipoController,
-                decoration: InputDecoration(labelText: 'Tipo'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el tipo';
-                  }
-                  return null;
+              DropdownButtonFormField<String>(
+                value: estado,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    estado = newValue!;
+                  });
                 },
-              ),
-              TextFormField(
-                controller: estadoController,
                 decoration: InputDecoration(labelText: 'Estado'),
+                items: <String>['POR_RECIBIR', 'RECIBIDO']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese el estado';
+                    return 'Por favor seleccione el estado';
                   }
                   return null;
                 },
               ),
+              SizedBox(height: 20),
               TextFormField(
                 controller: origenController,
                 decoration: InputDecoration(labelText: 'Origen'),
