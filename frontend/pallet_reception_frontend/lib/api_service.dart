@@ -22,4 +22,27 @@ class ApiService {
       rethrow;
     }
   }
+
+  // Método para agregar un nuevo pallet
+Future<Map<String, dynamic>?> addPallet(Map<String, dynamic> palletData) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/pallets'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(palletData),
+    );
+
+    if (response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to add pallet');
+    }
+  } catch (e) {
+    print('Error: $e');
+    rethrow;
+  }
+}
+
+
+
 }
