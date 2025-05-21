@@ -44,5 +44,26 @@ Future<Map<String, dynamic>?> addPallet(Map<String, dynamic> palletData) async {
 }
 
 
+// Método para actualizar el estado de un pallet
+Future<Map<String, dynamic>?> updatePalletEstado(String id, Map<String, dynamic> palletData) async {
+  try {
+    final response = await http.patch(
+      Uri.parse('$baseUrl/pallets/$id/estado'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(palletData),
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to update pallet status');
+    }
+  } catch (e) {
+    print('Error: $e');
+    rethrow;
+  }
+}
+
+
 
 }
