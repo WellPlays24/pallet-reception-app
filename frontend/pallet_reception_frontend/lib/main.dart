@@ -60,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pallet Reception'),
+        title: Text('Recepción de Pallets'),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator()) // Spinner de carga
