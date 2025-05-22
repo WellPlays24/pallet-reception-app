@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
-import 'api_service.dart'; // Asegúrate de importar el servicio
-import 'pallet_detail.dart'; // Importa la pantalla de detalles
-import 'add_pallet.dart';  // Importa la pantalla para agregar pallets
+import 'add_pallet.dart';
+import 'pallet_detail.dart';
+import 'api_service.dart';
 
 void main() {
-  
   runApp(PalletReceptionApp());
 }
 
 class PalletReceptionApp extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
-    
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Recepción de palets',
+      title: 'Pallet Reception',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -71,11 +68,13 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    // Navegar a la pantalla de agregar pallet
+                    // Navegar a la pantalla de agregar pallet y pasar el callback
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AddPalletScreen(),
+                        builder: (context) => AddPalletScreen(
+                          refreshList: _fetchPallets, // Pasar la función refreshList
+                        ),
                       ),
                     );
                   },
@@ -90,14 +89,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: Text(pallet['id'] ?? 'No ID'),
                         subtitle: Text('Estado: ${pallet['estado'] ?? 'No estado'}'),
                         onTap: () {
-                          // Navegar a la pantalla de detalles
+                          // Navegar a la pantalla de detalles y pasar refreshList
                           Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => PalletDetailScreen(
                                 pallet: pallet,
-                                refreshList: _fetchPallets,
-                                ),
+                                refreshList: _fetchPallets,  // Pasar la función refreshList
+                              ),
                             ),
                           );
                         },

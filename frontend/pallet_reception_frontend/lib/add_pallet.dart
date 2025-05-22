@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'api_service.dart'; // Asegúrate de importar el servicio
 
 class AddPalletScreen extends StatefulWidget {
+  final Function refreshList; // Callback para actualizar la lista de pallets
+
+  AddPalletScreen({required this.refreshList});
+
   @override
   _AddPalletScreenState createState() => _AddPalletScreenState();
 }
@@ -13,6 +17,7 @@ class _AddPalletScreenState extends State<AddPalletScreen> {
   // Controladores para los campos del formulario
   final TextEditingController idController = TextEditingController();
   final TextEditingController fechaController = TextEditingController();
+  final TextEditingController tipoController = TextEditingController();
   final TextEditingController estadoController = TextEditingController();
   final TextEditingController origenController = TextEditingController();
   final TextEditingController desdeEmpresaController = TextEditingController();
@@ -60,6 +65,7 @@ class _AddPalletScreenState extends State<AddPalletScreen> {
         // Mostrar mensaje de éxito y regresar a la lista de pallets
         if (response != null) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Pallet agregado con éxito')));
+          widget.refreshList();  // Llamar al callback para actualizar la lista
           Navigator.pop(context); // Regresar a la pantalla anterior (lista de pallets)
         }
       } catch (e) {
@@ -170,3 +176,4 @@ class _AddPalletScreenState extends State<AddPalletScreen> {
     );
   }
 }
+
