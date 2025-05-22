@@ -90,7 +90,19 @@ Para ejecutar este proyecto, se necesita tener las siguientes herramientas insta
 
     - Eliminar un pallet: Permite eliminar un pallet de la base de datos.
 
-    
+## Pruebas
+
+    - Pruebas del backend: El backend está cubierto por pruebas utilizando Jest.
+
+    - Pruebas de API: Se puede probar las rutas del backend usando Postman.   
+
+## Ejecutar las pruebas del backend
+
+    Navega a la carpeta del backend:
+    - cd .\backend\
+
+    Ejecuta las pruebas:
+    - npm test
 
 
 
