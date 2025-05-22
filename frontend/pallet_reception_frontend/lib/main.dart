@@ -4,14 +4,18 @@ import 'pallet_detail.dart'; // Importa la pantalla de detalles
 import 'add_pallet.dart';  // Importa la pantalla para agregar pallets
 
 void main() {
+  
   runApp(PalletReceptionApp());
 }
 
 class PalletReceptionApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
+    
     return MaterialApp(
-      title: 'Pallet Reception',
+      debugShowCheckedModeBanner: false,
+      title: 'Recepción de palets',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -90,7 +94,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => PalletDetailScreen(pallet: pallet),
+                              builder: (context) => PalletDetailScreen(
+                                pallet: pallet,
+                                refreshList: _fetchPallets,
+                                ),
                             ),
                           );
                         },

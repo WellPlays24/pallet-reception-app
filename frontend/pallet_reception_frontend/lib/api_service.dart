@@ -64,6 +64,25 @@ Future<Map<String, dynamic>?> updatePalletEstado(String id, Map<String, dynamic>
   }
 }
 
+// Método para eliminar un pallet
+Future<Map<String, dynamic>?> deletePallet(String id) async {
+  try {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/pallets/$id'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to delete pallet');
+    }
+  } catch (e) {
+    print('Error: $e');
+    rethrow;
+  }
+}
+
 
 
 }

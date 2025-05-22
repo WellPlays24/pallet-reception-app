@@ -3,8 +3,9 @@ import 'api_service.dart';  // Asegúrate de importar el servicio
 
 class PalletDetailScreen extends StatefulWidget {
   final Map<String, dynamic> pallet;
+  final Function refreshList; // Callback para actualizar la lista de pallets
 
-  PalletDetailScreen({required this.pallet});
+  PalletDetailScreen({required this.pallet, required this.refreshList});
 
   @override
   _PalletDetailScreenState createState() => _PalletDetailScreenState();
@@ -32,10 +33,26 @@ class _PalletDetailScreenState extends State<PalletDetailScreen> {
       // Verificar si la actualización fue exitosa
       if (response != null) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Estado actualizado con éxito')));
+        widget.refreshList();  // Llamar al callback para actualizar la lista
         Navigator.pop(context); // Regresar a la lista de pallets
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al actualizar el estado')));
+    }
+  }
+
+  // Función para eliminar el pallet
+  Future<void> _deletePallet() async {
+    try {
+      final response = await ApiService('http://localhost:3000').deletePallet(widget.pallet['id']);
+
+      if (response != null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Pallet eliminado con éxito')));
+        widget.refreshList();  // Llamar al callback para actualizar la lista
+        Navigator.pop(context); // Regresar a la lista de pallets
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error al eliminar el pallet')));
     }
   }
 
@@ -86,6 +103,14 @@ class _PalletDetailScreenState extends State<PalletDetailScreen> {
             ElevatedButton(
               onPressed: _updateEstado,
               child: Text('Actualizar Estado'),
+            ),
+
+            // Botón para eliminar el pallet
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _deletePallet,
+              child: Text('Eliminar Pallet'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             ),
           ],
         ),
